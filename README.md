@@ -4,7 +4,7 @@ Remove two tones and signals above 20kHz.
 1. Ascience-Fast-Piano.wav : music without noise  
 2. Ascience-Fast-Piano-Add-Tones.wav : music polluted by 2 tones(one tone frequency > 15000Hz, one tone frequency < 100Hz.) *Hint :  In about 0.2 seconds of the beginning of the music, there is only noise of two tones.  
 
-### Header
+### 1. Header
 ```js
 typedef struct{
     //RIFF
@@ -27,7 +27,7 @@ typedef struct{
 } wav_header;
 wav_header wavheader;
 ```
-### Wav file header format :
+#### Wav file header format :
 (bits)  
 0-3   : ChunkID 識別碼"RIFF"  
 4-7   : ChunkSize 檔案大小-8(bytes)  
@@ -44,7 +44,7 @@ wav_header wavheader;
 40-43 : Subchunk2Size 音訊資料大小(in bytes)  
 after 44 : data 音訊資料  
 
-### Read data
+### 2. Read data
 1.  讀取header，計算sample的總數量N  
 2.  fread讀取data  
 ```js
@@ -64,7 +64,7 @@ short * data = malloc(sizeof(short)*N);
 fread(data,2,N,fp_WavIn); //讀data 
 ```    
 
-### Remove tones
+### 3. Remove tones
 1.  取前0.1s的資料存進陣列tones[ ]，前0.1s共有9600個點(一個聲道4800個點，雙聲道*2)
 2.  音檔的資料每9600個點刪除一次tones，也就是每0.1s刪一次
 ```js
@@ -81,11 +81,12 @@ free(tones);
 fclose(fp_WavIn);
 ```
 
-### LPF
+### 4. LPF
 1.  在time domain做LPF
 2.  rect(f)經由IDFT轉換會變成sinc(t)
 3.  音檔的data跟取hamming的sinc做convolution
 4.  輸出的資料要轉回short
+#### (1) Some define
 ```js
 float hamming(int N, int n){
 	return 0.54 - 0.46*cos(2*PI*(float)n/(float)N);
@@ -102,13 +103,13 @@ float low_pass(int m, int n){
   }
 }
 ```
-#### LPF  
+#### (2) LPF  
 ```js
 for(n=0;n<(2*M+1);n++){
     h[n] = low_pass(M,n);
 }
 ```
-#### convolution
+#### (3) Convolution
 ```js
 short *output = malloc(sizeof(short)*N);
 float tmp;
@@ -123,7 +124,7 @@ for(i=0;i<N;i++){
 }
 ```
 
-### Write data
+### 5. Write data
 1.  先寫入header，再寫入音訊資料  
 2.  close file  
 ```js
