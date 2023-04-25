@@ -24,12 +24,12 @@ typedef struct{
     //format
     char Subchunk1ID[4];//fmt
     int Subchunk1Size;
-    short AudioFormat;//¤@¯ë¬°1 ªí¥Ü¬°PCM½s½X
-    short NumChannels;//Án¹D¼Æ¶q
-    int SampleRate;//±Ä¼Ë²v
-    int ByteRate;//±Ä¼Ë²v
-    short BlockAlign;//¨C­Óblockªº¥­§¡¤j¤p
-    short BitsPerSample;//¨C¬í±Ä¼Ë¤ñ¯S²v
+    short AudioFormat;//ä¸€èˆ¬ç‚º1 è¡¨ç¤ºç‚ºPCMç·¨ç¢¼
+    short NumChannels;//è²é“æ•¸é‡
+    int SampleRate;//æ¡æ¨£ç‡
+    int ByteRate;//æ¡æ¨£ç‡
+    short BlockAlign;//æ¯å€‹blockçš„å¹³å‡å¤§å°
+    short BitsPerSample;//æ¯ç§’æ¡æ¨£æ¯”ç‰¹ç‡
     //data
     char Subchunk2ID[4];//data
     int Subchunk2Size;
@@ -43,25 +43,25 @@ float hamming(int N, int n){
 }
 
 //low pass
-//¦b time domain¥Îsinc°µlow pass 
+//åœ¨ time domainç”¨sincåšlow pass 
 float low_pass(int m, int n){
 	float wc = 2*PI*FC/FS;
 	
 	if(n == m){
-		return wc/PI;//sinc¤À¥Àµ¥©ó0®É 
+		return wc/PI;//sincåˆ†æ¯ç­‰æ–¼0æ™‚ 
 	}
 	else{
-		return sinf(wc*((float)(n-m)))/PI/((float)(n-m))*hamming(2*m+1,n);//sinc¨ú hamming 
+		return sinf(wc*((float)(n-m)))/PI/((float)(n-m))*hamming(2*m+1,n);//sincå– hamming 
 	}
 }
 
 
 int main(int argc, char **argv){
 
-    _setmode( _fileno( stdout ), _O_BINARY );//¨Ïstdout¦³ binary mode
-    _setmode( _fileno( stderr ), _O_BINARY );//¨Ïstderr¦³ binary mode
+    _setmode( _fileno( stdout ), _O_BINARY );//ä½¿stdoutæœ‰ binary mode
+    _setmode( _fileno( stderr ), _O_BINARY );//ä½¿stderræœ‰ binary mode
 
-    int N;//«Å§i¦s©ñ sampleÁ`­Ó¼ÆªºÅÜ¼ÆN
+    int N;//å®£å‘Šå­˜æ”¾ sampleç¸½å€‹æ•¸çš„è®Šæ•¸N
     int i=0,j=0,k=0;
     int n=0;
     float h[2*M+1] = {0};
@@ -79,22 +79,22 @@ int main(int argc, char **argv){
 		
 	fp_WavOut = fopen(argv[2],"wb");
 	
-    fread(&wavheader, 44, 1, fp_WavIn); //±N headerÅª¥X¨Ó¦s©ñ¨ì wavheader³o­ÓÅÜ¼Æ¸Ì
+    fread(&wavheader, 44, 1, fp_WavIn); //å°‡ headerè®€å‡ºä¾†å­˜æ”¾åˆ° wavheaderé€™å€‹è®Šæ•¸è£¡
 	
-    N = wavheader.Subchunk2Size / (wavheader.BlockAlign)* wavheader.NumChannels; //­pºâsampleªºÁ`¼Æ¶qN
+    N = wavheader.Subchunk2Size / (wavheader.BlockAlign)* wavheader.NumChannels; //è¨ˆç®—sampleçš„ç¸½æ•¸é‡N
 	
 	short *data = malloc(sizeof(short)*N);
-    fread(data,2,N,fp_WavIn); //Åª data 
+    fread(data,2,N,fp_WavIn); //è®€ data 
 	
 //delete tones
-	//¨ú«e0.1¬íªºtones ¨C0.1¬í§R¤@¦¸
+	//å–å‰0.1ç§’çš„tones æ¯0.1ç§’åˆªä¸€æ¬¡
     short *tones = malloc(sizeof(short)*9600);
 
-	for(i=0;i<9600;i++){     //«e­±0.1¬í¦@¦³4800*2­ÓÂI
+	for(i=0;i<9600;i++){     //å‰é¢0.1ç§’å…±æœ‰4800*2å€‹é»
         tones[i] = data[i];
 	}
 
-    for(i=0;i<N/9600;i++){  //¨C0.1¬í§R¤@¦¸tone
+    for(i=0;i<N/9600;i++){  //æ¯0.1ç§’åˆªä¸€æ¬¡tone
         for(j=0;j<9600;j++){
             data[i*9600+j]  = data[i*9600+j] - tones[j];
         }
@@ -121,9 +121,9 @@ int main(int argc, char **argv){
 	}
 
 //write
-	fwrite(&wavheader, sizeof(wavheader), 1, fp_WavOut); //±NwavHeader³o­ÓÅÜ¼Æªº¤º®e¼g¶i¥hÀÉ®×header³¡¤À
+	fwrite(&wavheader, sizeof(wavheader), 1, fp_WavOut); //å°‡wavHeaderé€™å€‹è®Šæ•¸çš„å…§å®¹å¯«é€²å»æª”æ¡ˆheaderéƒ¨åˆ†
 	
-	for(i=0;i<N;i++){	// ±N­µ°T¸ê®Æ¤º®e¼g¶i¥hwavÀÉ®×
+	for(i=0;i<N;i++){	// å°‡éŸ³è¨Šè³‡æ–™å…§å®¹å¯«é€²å»wavæª”æ¡ˆ
 		fwrite(output+i, sizeof(short), 1, fp_WavOut);
 	}
 	free(data);
